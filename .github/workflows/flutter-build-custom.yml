@@ -60,6 +60,12 @@ jobs:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
+      - name: Disable Flutter analytics
+        shell: bash
+        run: |
+          flutter config --no-analytics
+          dart --disable-analytics
+
       - name: Replace Flutter engine with RustDesk custom engine
         shell: powershell
         run: |
