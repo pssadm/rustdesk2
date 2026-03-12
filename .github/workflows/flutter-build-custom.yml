@@ -131,6 +131,9 @@ jobs:
           echo "Config file contents (app_name check):"
           python3 -c "import json; c=json.load(open('custom-config.json')); print(f'app_name={c[\"app_name\"]}, servers={c[\"rendezvous_servers\"]}')"
           python3 scripts/apply-branding.py --config custom-config.json --assets assets/icons/
+          # Export app name for later steps (MSI branding)
+          APP_NAME=$(python3 -c "import json; print(json.load(open('custom-config.json'))['app_name'])")
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
 
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
@@ -228,7 +231,7 @@ jobs:
         shell: powershell
         run: |
           pushd ./res/msi
-          python preprocess.py --arp -d ../../rustdesk
+          python preprocess.py --arp --app-name "$env:APP_NAME" -d ../../rustdesk
           nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
           mv ./Package/bin/x64/Release/en-us/Package.msi "../../SignOutput/rustdesk-${{ env.VERSION }}-x86_64.msi"
