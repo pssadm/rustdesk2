@@ -21,7 +21,7 @@ env:
   FLUTTER_VERSION: "3.24.5"
   RUST_VERSION: "1.75"
   LLVM_VERSION: "15.0.6"
-  VCPKG_COMMIT_ID: "a34c873a9717a888f58dc05571dde15c12c4f9ab"
+  VCPKG_COMMIT_ID: "dd306f32e07d87fdb16837af64f33b6b415c770a"
   VERSION: ${{ github.event.inputs.version || '1.4.6' }}
 
 jobs:
