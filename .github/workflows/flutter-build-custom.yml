@@ -219,7 +219,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build MSI installer
-        shell: bash
+        shell: powershell
         run: |
           pushd ./res/msi
           python preprocess.py --arp -d ../../rustdesk
