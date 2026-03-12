@@ -67,6 +67,10 @@ jobs:
           cargo install cargo-expand
           cargo install flutter_rust_bridge_codegen --version 1.80.1 --features uuid
 
+      - name: Flutter pub get
+        run: |
+          cd flutter && flutter pub get
+
       - name: Generate bridge files
         run: |
           ~/.cargo/bin/flutter_rust_bridge_codegen \
