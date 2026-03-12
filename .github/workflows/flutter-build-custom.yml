@@ -55,7 +55,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ env.BRIDGE_FLUTTER_VERSION }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Disable Flutter analytics
         run: |
