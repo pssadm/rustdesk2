@@ -123,7 +123,13 @@ jobs:
         env:
           CUSTOM_CONFIG: ${{ secrets.CUSTOM_CONFIG }}
         run: |
+          if [ -z "$CUSTOM_CONFIG" ]; then
+            echo "ERROR: CUSTOM_CONFIG secret is empty or not set!"
+            exit 1
+          fi
           echo "$CUSTOM_CONFIG" > custom-config.json
+          echo "Config file contents (app_name check):"
+          python3 -c "import json; c=json.load(open('custom-config.json')); print(f'app_name={c[\"app_name\"]}, servers={c[\"rendezvous_servers\"]}')"
           python3 scripts/apply-branding.py --config custom-config.json --assets assets/icons/
 
       - name: Install LLVM and Clang
