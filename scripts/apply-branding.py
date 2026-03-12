@@ -40,7 +40,7 @@ def patch_config_rs(config):
         print(f"  WARNING: {filepath} not found, skipping config.rs patching")
         return False
 
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
         content = f.read()
 
     original = content
@@ -80,7 +80,7 @@ def patch_config_rs(config):
         )
 
     if content != original:
-        with open(filepath, "w") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
         print(f"  Patched {filepath}")
         return True
@@ -96,7 +96,7 @@ def patch_cargo_toml(config):
         print(f"  WARNING: {filepath} not found, skipping")
         return False
 
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
         content = f.read()
 
     original = content
@@ -150,7 +150,7 @@ def patch_cargo_toml(config):
     )
 
     if content != original:
-        with open(filepath, "w") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
         print(f"  Patched {filepath}")
         return True
@@ -246,14 +246,14 @@ def patch_lang_files(config):
 
     count = 0
     for filepath in lang_files:
-        with open(filepath, "r") as f:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
         # Replace "RustDesk" in string literals only (between quotes)
         new_content = re.sub(r'("(?:[^"\\]|\\.)*")', lambda m: m.group(0).replace("RustDesk", app_name), content)
 
         if new_content != content:
-            with open(filepath, "w") as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 f.write(new_content)
             count += 1
 
@@ -275,7 +275,7 @@ def patch_desktop_files(config):
 
     count = 0
     for filepath in desktop_files:
-        with open(filepath, "r") as f:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
         new_content = re.sub(
@@ -286,7 +286,7 @@ def patch_desktop_files(config):
         )
 
         if new_content != content:
-            with open(filepath, "w") as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 f.write(new_content)
             print(f"  Patched {filepath}")
             count += 1
