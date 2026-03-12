@@ -106,28 +106,14 @@ def patch_cargo_toml(config):
     author = config.get("author", "")
     identifier = config.get("app_identifier", f"com.example.{slug}")
 
-    # Update name field (first occurrence, under [package])
-    content = re.sub(
-        r'(^\s*name\s*=\s*)"[^"]*"',
-        f'\\1"{slug}"',
-        content,
-        count=1,
-        flags=re.MULTILINE,
-    )
+    # NOTE: Do NOT change the crate name or default-run fields.
+    # The crate name must remain "rustdesk" because flutter_rust_bridge
+    # code generation depends on it. Only change display metadata.
 
     # Update description
     content = re.sub(
         r'(^\s*description\s*=\s*)"[^"]*"',
         f'\\1"{description}"',
-        content,
-        count=1,
-        flags=re.MULTILINE,
-    )
-
-    # Update default-run if present
-    content = re.sub(
-        r'(^\s*default-run\s*=\s*)"[^"]*"',
-        f'\\1"{slug}"',
         content,
         count=1,
         flags=re.MULTILINE,
