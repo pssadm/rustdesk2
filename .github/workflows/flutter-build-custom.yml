@@ -41,7 +41,7 @@ jobs:
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - name: Export GitHub Actions cache variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
@@ -66,7 +66,7 @@ jobs:
           version: ${{ env.LLVM_VERSION }}
 
       - name: Install Flutter
-        uses: subosito/flutter-action@v2.12.0
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -173,7 +173,7 @@ jobs:
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - name: Export GitHub Actions cache variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
@@ -217,7 +217,7 @@ jobs:
           prefix-key: ubuntu-22.04
 
       - name: Install Flutter
-        uses: subosito/flutter-action@v2.12.0
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -299,14 +299,14 @@ jobs:
   # MACOS BUILD
   # ===========================================================================
   build-macos:
-    runs-on: macos-13
+    runs-on: macos-14
     env:
       MAC_RUST_VERSION: "1.81"
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-      MACOSX_DEPLOYMENT_TARGET: "10.15"
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
     steps:
       - name: Export GitHub Actions cache variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
@@ -326,15 +326,11 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          brew install llvm create-dmg
-          # Install nasm 2.16.x
-          wget https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/macosx/nasm-2.16.03-macosx.zip
-          unzip nasm-2.16.03-macosx.zip
-          sudo cp nasm-2.16.03/nasm /usr/local/bin/nasm
-          nasm --version
+          brew install llvm create-dmg nasm
+          echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
 
       - name: Install Flutter
-        uses: subosito/flutter-action@v2.12.0
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -357,13 +353,13 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.MAC_RUST_VERSION }}
-          targets: x86_64-apple-darwin
+          targets: aarch64-apple-darwin
           components: rustfmt
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
         with:
-          prefix-key: macos-13
+          prefix-key: macos-14
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -373,9 +369,9 @@ jobs:
 
       - name: Install vcpkg dependencies
         run: |
-          $VCPKG_ROOT/vcpkg install --triplet x64-osx --x-install-root="$VCPKG_ROOT/installed"
+          $VCPKG_ROOT/vcpkg install --triplet arm64-osx --x-install-root="$VCPKG_ROOT/installed"
         env:
-          VCPKG_DEFAULT_HOST_TRIPLET: x64-osx
+          VCPKG_DEFAULT_HOST_TRIPLET: arm64-osx
 
       - name: Show version info
         run: |
@@ -396,7 +392,7 @@ jobs:
           CREATE_DMG="$(readlink -f "$CREATE_DMG" || echo "$CREATE_DMG")"
           sed -i '' -e 's/MAXIMUM_UNMOUNTING_ATTEMPTS=3/MAXIMUM_UNMOUNTING_ATTEMPTS=7/' "$CREATE_DMG" 2>/dev/null || true
 
-          APP_NAME=$(ls flutter/build/macos/Build/Products/Release/*.app -d 2>/dev/null | head -1 | xargs basename)
+          APP_NAME=$(find flutter/build/macos/Build/Products/Release -maxdepth 1 -name "*.app" -print -quit | xargs basename 2>/dev/null)
           if [ -z "$APP_NAME" ]; then
             APP_NAME="RustDesk.app"
           fi
@@ -405,7 +401,7 @@ jobs:
             --hide-extension "$APP_NAME" \
             --window-size 800 400 \
             --app-drop-link 600 185 \
-            "rustdesk-${{ env.VERSION }}-x86_64.dmg" \
+            "rustdesk-${{ env.VERSION }}-aarch64.dmg" \
             "flutter/build/macos/Build/Products/Release/$APP_NAME"
 
       - name: Upload macOS artifacts
