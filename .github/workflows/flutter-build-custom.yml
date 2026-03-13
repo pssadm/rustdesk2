@@ -230,10 +230,8 @@ jobs:
       - name: Build MSI installer
         shell: powershell
         run: |
-          # Rename exe to match app name (preprocess.py expects {app_name}.exe)
-          Copy-Item "./rustdesk/rustdesk.exe" "./rustdesk/$env:APP_NAME.exe"
           pushd ./res/msi
-          python preprocess.py --arp --app-name "$env:APP_NAME" -v "${{ env.VERSION }}" -d ../../rustdesk
+          python preprocess.py --arp -d ../../rustdesk
           nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
           mv ./Package/bin/x64/Release/en-us/Package.msi "../../SignOutput/rustdesk-${{ env.VERSION }}-x86_64.msi"
