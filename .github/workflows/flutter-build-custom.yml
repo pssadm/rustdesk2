@@ -227,11 +227,21 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Prepare branded exe for MSI
+        shell: powershell
+        run: |
+          # MSI preprocess.py expects {app_name}.exe in the dist dir
+          Copy-Item "./rustdesk/rustdesk.exe" "./rustdesk/$env:APP_NAME.exe"
+          # Also copy branded icon for MSI resources
+          if (Test-Path "./assets/icons/icon-windows.ico") {
+            Copy-Item "./assets/icons/icon-windows.ico" "./res/icon.ico" -Force
+          }
+
       - name: Build MSI installer
         shell: powershell
         run: |
           pushd ./res/msi
-          python preprocess.py --arp -d ../../rustdesk
+          python preprocess.py --arp --app-name "$env:APP_NAME" -v "${{ env.VERSION }}" -d ../../rustdesk
           nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
           mv ./Package/bin/x64/Release/en-us/Package.msi "../../SignOutput/rustdesk-${{ env.VERSION }}-x86_64.msi"
