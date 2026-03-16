@@ -45,8 +45,14 @@ def patch_config_rs(config):
 
     original = content
 
-    # Patch APP_NAME
+    # Patch APP_NAME — it's a RwLock<String> in lazy_static, not a const
     app_name = config["app_name"]
+    content = re.sub(
+        r'(pub\s+static\s+ref\s+APP_NAME\s*:\s*RwLock<String>\s*=\s*RwLock::new\()"[^"]*"(\.to_owned\(\)\s*\)\s*;)',
+        f'\\1"{app_name}"\\2',
+        content,
+    )
+    # Fallback: also try const pattern in case upstream changes it
     content = re.sub(
         r'(pub\s+)?const\s+APP_NAME\s*:\s*&\s*str\s*=\s*"[^"]*"\s*;',
         f'pub const APP_NAME: &str = "{app_name}";',
@@ -216,15 +222,12 @@ def copy_icons(assets_dir):
 
 
 def patch_lang_files(config):
-    """Replace 'RustDesk' with custom app name in language string files."""
+    """Replace 'RustDesk' with custom app name in language string files and Flutter Dart files."""
     app_name = config["app_name"]
-    lang_pattern = os.path.join("src", "lang", "*.rs")
-    lang_files = glob.glob(lang_pattern)
 
-    if not lang_files:
-        # Also try Flutter lang files
-        lang_pattern = os.path.join("flutter", "lib", "**", "*.dart")
-        lang_files = glob.glob(lang_pattern, recursive=True)
+    # Collect both Rust lang files AND Flutter Dart files
+    lang_files = glob.glob(os.path.join("src", "lang", "*.rs"))
+    lang_files += glob.glob(os.path.join("flutter", "lib", "**", "*.dart"), recursive=True)
 
     if not lang_files:
         print("  WARNING: No language files found")
